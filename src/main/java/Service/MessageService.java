@@ -38,8 +38,12 @@ public class MessageService {
         return messageDAO.getMessageByID(message_id);
     }
 
-    public Message updateMessage(int message_id, String newMessage){
-        return messageDAO.updateMessageByID(message_id, newMessage);
+    public Message updateMessage(int message_id, Message newMessage){
+        String message = newMessage.getMessage_text();
+        if(messageDAO.getMessageByID(message_id) != null && message.length() > 0 && message.length() <= 255) {
+            return messageDAO.updateMessageByID(message_id, newMessage);
+        }
+        return null;
     }
 
     public Message deleteMessageByID(int message_id){

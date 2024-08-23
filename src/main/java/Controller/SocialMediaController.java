@@ -34,9 +34,9 @@ public class SocialMediaController {
         app.post("/messages", this::postMessageHandler);
         app.get("/messages", this::getAllMessagesHandler);
         app.get("/accounts/{account_id}/messages", this::getAllUserMessagesHandler);
-        app.get("/messages/{id}", this::getMessageHandler);
-        app.patch("/messages/{id}", this::patchUpdateMessageHandler);
-        app.delete("/messages/{id}", this::deleteMessageHandler);
+        app.get("/messages/{message_id}", this::getMessageHandler);
+        app.patch("/messages/{message_id}", this::patchUpdateMessageHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageHandler);
 
         return app;
     }
@@ -100,10 +100,13 @@ public class SocialMediaController {
      * @param ctx The Javalin Context object manages information about both the HTTP request and response.
      */
     private void getMessageHandler(Context ctx) {
-        String stid = ctx.pathParam("id");
-        int id = Integer.parseInt(stid);
+        String strid = ctx.pathParam("message_id");
+        int id = Integer.parseInt(strid);
         Message message = messageService.getMessageByID(id);
-        ctx.json(message);
+        if(message != null){
+            ctx.json(message);
+        }
+        ctx.status(200);
     }
 
     /**
@@ -111,8 +114,8 @@ public class SocialMediaController {
      * @param ctx The Javalin Context object manages information about both the HTTP request and response.
      */
     private void getAllUserMessagesHandler(Context ctx) {
-        String stid = ctx.pathParam("account_id");
-        int id = Integer.parseInt(stid);
+        String strid = ctx.pathParam("account_id");
+        int id = Integer.parseInt(strid);
         List<Message> messages = messageService.getAllUserMessages(id);
         ctx.json(messages);
     }
@@ -122,10 +125,16 @@ public class SocialMediaController {
      * @param ctx The Javalin Context object manages information about both the HTTP request and response.
      */
     private void patchUpdateMessageHandler(Context ctx) throws JsonProcessingException {
-        //String stid = ctx.pathParam("id");
-        //int id = Integer.parseInt(stid);
-        //ObjectMapper mapper = new ObjectMapper();
-        //String jsonString = ctx.body(); 
+        String strid = ctx.pathParam("message_id");
+        int id = Integer.parseInt(strid);
+        ObjectMapper mapper = new ObjectMapper();
+        Message newMessage = mapper.readValue(ctx.body(), Message.class);
+        Message message = messageService.updateMessage(id, newMessage);
+        if(message != null){
+            ctx.json(message);
+        }else{
+            ctx.status(400);
+        }
     }
 
     /**
@@ -133,9 +142,12 @@ public class SocialMediaController {
      * @param ctx The Javalin Context object manages information about both the HTTP request and response.
      */
     private void deleteMessageHandler(Context ctx) {
-        String stid = ctx.pathParam("id");
+        String stid = ctx.pathParam("message_id");
         int id = Integer.parseInt(stid);
         Message message = messageService.deleteMessageByID(id);
-        ctx.json(message);
+        if(message != null){
+            ctx.json(message);
+        }
+        ctx.status(200);
     }
 }
